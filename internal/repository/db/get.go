@@ -10,9 +10,9 @@ import (
 )
 
 const (
-	qGetUserFileList = "select id, path from tasks where user_id = $1 and state = 'DONE' and result is not null order by created"
-	qGetUserFileItem = "select id, path, result from tasks where user_id = $1 and file_id = $2 and result is not null"
-	qGetFileWord     = "select id, path, result from tasks where user_id = $1 and result is not null $2 ~ result or user_id = $3 and result is not null and $4 ~ result_short"
+	qGetUserFileList = "select chat_id, task_id, input_file_id from tasks where user_id = $1 order by created"
+	qGetUserFileItem = "select chat_id, task_id, input_file_id, result from tasks where user_id = $1 and file_id = $2"
+	qGetFileWord     = "select chat_id, task_id, input_file_id from tasks where user_id = $1 and $2 ~ result or user_id = $3 and $4 ~ result_short"
 )
 
 func GetUserFile(ctx context.Context, conn model.Connection, id int64) ([]*model.FileInfo, error) {
@@ -28,7 +28,7 @@ func GetUserFile(ctx context.Context, conn model.Connection, id int64) ([]*model
 
 	for rows.Next() {
 		var item model.FileInfo
-		if err := rows.Scan(&item.ID, &item.Path); err != nil {
+		if err := rows.Scan(&item.ChatID, &item.TaskID, &item.FileID); err != nil {
 			logger.Log().Error("error GetUserFile - Scan", zap.Error(err))
 			return nil, err
 		}
@@ -55,7 +55,7 @@ func GetUserFileItem(ctx context.Context, conn model.Connection, id int64, file 
 	if !rows.Next() {
 		return nil, errors.New("not found")
 	}
-	if err := rows.Scan(&x.ID, &x.Path, &x.Data); err != nil {
+	if err := rows.Scan(&x.ChatID, &x.TaskID, &x.FileID, &x.Data); err != nil {
 		logger.Log().Error("error GetUserFile - Scan", zap.Error(err))
 		return nil, err
 	}
@@ -81,7 +81,7 @@ func GetFileByWord(ctx context.Context, conn model.Connection, id int64, word st
 
 	for rows.Next() {
 		var item model.FileInfo
-		if err := rows.Scan(&item.ID, &item.Path); err != nil {
+		if err := rows.Scan(&item.ChatID, &item.TaskID, &item.FileID); err != nil {
 			logger.Log().Error("error GetUserFile - Scan", zap.Error(err))
 			return nil, err
 		}

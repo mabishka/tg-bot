@@ -68,9 +68,10 @@ type SpeachTaskResponse struct {
 }
 
 type FileInfo struct {
-	ID   string
-	Path string
-	Data string
+	ChatID string
+	TaskID string
+	FileID string
+	Data   string
 }
 
 type Words struct {
